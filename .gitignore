@@ -1,0 +1,8 @@
+# uv
+uv.lock
+
+# jupyter
+.ipynb_checkpoints/
+
+# vim
+.*.sw?
