@@ -1,5 +1,9 @@
 # Setting up a Python environment using `uv`
 
+> [!NOTE]
+> This works perfectly until you try to open UM output .pp files, when you will discover that `mo_pack` is not
+> installed. It's not easily installable using `uv`.
+
 Log in to the notebook service: https://notebooks.jasmin.ac.uk/
 
 Open a terminal:

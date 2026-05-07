@@ -1,8 +1,5 @@
 # Setting up a Python environment using `conda`
 
-> [!NOTE]
-> The recommended way of setting up an environment is to [use `uv`](python_setup_uv.md)
-
 Log in to the notebook service: https://notebooks.jasmin.ac.uk/
 
 Open a terminal:
