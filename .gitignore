@@ -6,3 +6,6 @@ uv.lock
 
 # vim
 .*.sw?
+
+# PyCharm
+.idea
