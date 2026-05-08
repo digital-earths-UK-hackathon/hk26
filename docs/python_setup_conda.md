@@ -3,7 +3,7 @@
 You can do this on JASMIN, or on your local computer. If on JASMIN,
 log in to the notebook service: https://notebooks.jasmin.ac.uk/
 
-Open a terminal (through the notebook service or otherwise):
+Open a terminal (through the notebook service or otherwise -- see note on ssh below if `ssh`ing in):
 
 Clone this repo:
 
@@ -28,3 +28,8 @@ To install additional packages:
 conda activate hk26_env
 conda install <package_name>
 ```
+
+## Running on JASMIN ssh
+
+If you are `ssh`ing into JASMIN and want to run on the command line, you may need to run `module load jaspy` first before
+using and `conda` commands or activating your environment.
