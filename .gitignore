@@ -4,6 +4,9 @@ uv.lock
 # jupyter
 .ipynb_checkpoints/
 
+# Python
+__pycache__
+
 # vim
 .*.sw?
 
