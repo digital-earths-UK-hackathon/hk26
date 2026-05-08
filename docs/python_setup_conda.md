@@ -3,7 +3,7 @@
 You can do this on JASMIN, or on your local computer. If on JASMIN,
 log in to the notebook service: https://notebooks.jasmin.ac.uk/
 
-Open a terminal (through the notebook service or otherwise -- see note on ssh below if `ssh`ing in):
+Open a terminal in JupyterLab: File → New → Terminal
 
 Clone this repo:
 
@@ -28,6 +28,10 @@ To install additional packages:
 conda activate hk26_env
 conda install <package_name>
 ```
+
+## JASMIN help docs
+
+See [here for more information about using the JASMIN notebook service](https://help.jasmin.ac.uk/docs/interactive-computing/jasmin-notebooks-service/).
 
 ## Running on JASMIN ssh
 
