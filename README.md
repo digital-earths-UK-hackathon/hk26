@@ -6,8 +6,9 @@ If you haven't already set up Python on JASMIN, see [this guide](docs/python_set
 
 ## Dataset catalog
 
-You can then open the datasets contained in [this intake 0.7 catalog](https://github.com/digital-earths-UK-hackathon/catalog/blob/main/catalog.yaml).
-Note, to open the catalog in Python using `intake`, you need to use the raw content.
+You can then open the datasets contained in [this intake 0.7 catalog](https://digital-earths-global-hackathon.github.io/catalog/).
+You can find all Unified Model by looking for entried that start with `um_`, and those that were created for this hackathon
+by their `_hk26` suffix.
 
 ## JASMIN notebooks
 
