@@ -3,6 +3,7 @@
 ## Getting started on JASMIN
 
 If you haven't already set up Python on JASMIN, see [this guide](docs/python_setup_conda.md).
+If planning to commit any code to community repositories on GitHub, you may also want to check [this guide to setting up GitHub access](docs/github_setup.md)
 
 ## Dataset catalog
 
