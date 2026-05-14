@@ -18,7 +18,7 @@ There are some notebooks that give examples of how to access the data, for examp
 To use these on JASMIN, clone this repo into your home directory and then navigate to the `notebooks` directory in the
 [JASMIN notebook service](https://notebooks.jasmin.ac.uk/).
 Or you can directly download the notebook and upload to the [JASMIN notebook service](https://notebooks.jasmin.ac.uk/).
-The notebooks can also be run locally; just set `on_jasmin = False`.
+The notebooks can also be run locally; just set use the `online` catalog.
 
 ## Getting help
 
