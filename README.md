@@ -25,5 +25,3 @@ The notebooks can also be run locally; just set use the `online` catalog.
 If you run into problems with JASMIN accounts, you can access [JASMIN support](https://www.jasmin.ac.uk/help/contact/).
 Make sure to put hk26 in the subject field. If you have problems with these instructions or the software, please email
 [Mark Muetzelfeldt](mailto:mark.muetzelfeldt@reading.ac.uk), and put hk26 in the subject.
-
-
