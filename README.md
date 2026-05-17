@@ -45,6 +45,8 @@ git push origin my_new_branch
 # Go to https://github.com/digital-earths-UK-hackathon/hk26 and look for the option to create new pull request.
 # Or go straight to https://github.com/digital-earths-UK-hackathon/hk26/pulls
 # Create and merge your PR into main.
+# You can add reviewers here - this is recommended if you are unsure about anything or are touching any files outside
+# of your hk26-<team> directory.
 
 # Checkout main and get your new changes
 git checkout main
