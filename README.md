@@ -40,6 +40,7 @@ git add .
 git commit
 
 # Push your changes to github
+# If you get an error, email your github username to Mark Muetzelfeldt, email below.
 git push origin my_new_branch
 
 # Go to https://github.com/digital-earths-UK-hackathon/hk26 and look for the option to create new pull request.
