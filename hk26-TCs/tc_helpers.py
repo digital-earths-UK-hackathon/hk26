@@ -44,6 +44,8 @@ def load_syclops():
     tracks = {}
     for name, path in dataset_paths.items():
         model_track = huracanpy.load(track_dir + path + '/' + path + '_track_20200201-20210301_6h_tc_psl.csv')
+        # drop storms that form before March 2020 so we have exactly 12 months of data and no spin-up artefacts. 
+        model_track = huracanpy.trackswhere(model_track, model_track.track_id, lambda x: x.time[0] >= np.datetime64('2020-03-01'))
         # convert units from m/s to knots when loading in for consistency with IBTrACS
         model_track['sfcwind_max'] *= 1.944
         model_track['psl_min'] *= 1/100
@@ -53,8 +55,8 @@ def load_syclops():
     # also add IBTrACS data from huracanpy
     obs_track = huracanpy.load(source="ibtracs", ibtracs_subset="usa")
     # subset storms that overlap with model dates + prune timestamps to match model
-    obs_tracks_overlap = obs_track.where((obs_track.time >= np.datetime64('2020-02-01')) &
-                                         (obs_track.time <= np.datetime64('2021-02-28')),drop=True)
+    obs_tracks_overlap = huracanpy.trackswhere(obs_track, obs_track.track_id, lambda x:(x.time[0] > np.datetime64('2020-03-01')) &
+                                               (x.time[0] < np.datetime64('2021-03-01')))
     model_times = tracks['10kmCoMorph'].time.dt.time
     obs_tracks_clean = obs_tracks_overlap.where(obs_tracks_overlap.time.dt.time.isin([model_times]), drop=True)  
     obs_tracks_clean = obs_tracks_clean.rename_vars({'wind' : 'sfcwind_max' , 'slp' : 'psl_min'})
