@@ -43,17 +43,16 @@ def diurnal_cycle(da):
 
 def compute_diurnal_cycles(zarr_path):
     _, ds_box = load_box(zarr_path)
-    ds_mean = ds_box[['cape', 'lnb']].mean(dim='cell').compute()
+    ds_mean = ds_box[['cape', 'lnb', 'w_eff', 'tb_diff']].mean(dim='cell').compute()
 
     jja = ds_mean.time.dt.month.isin([6, 7, 8])
     djf = ds_mean.time.dt.month.isin([12, 1, 2])
 
-    return {
-        'cape_jja': diurnal_cycle(ds_mean.cape.isel(time=jja)),
-        'cape_djf': diurnal_cycle(ds_mean.cape.isel(time=djf)),
-        'lnb_jja':  diurnal_cycle(ds_mean.lnb.isel(time=jja)),
-        'lnb_djf':  diurnal_cycle(ds_mean.lnb.isel(time=djf)),
-    }
+    cycles = {}
+    for var in ['cape', 'lnb', 'w_eff', 'tb_diff']:
+        for season, mask in [('jja', jja), ('djf', djf)]:
+            cycles[f'{var}_{season}'] = diurnal_cycle(ds_mean[var].isel(time=mask))
+    return cycles
 
 
 def plot_region_map(ax):
@@ -91,8 +90,10 @@ def plot_region_map(ax):
 def plot(cycles, output):
     hours = cycles['cape_jja'][0].hour.values
     stem = output.rsplit('.', 1)
-    map_output = f'{stem[0]}_map.{stem[1]}' if len(stem) == 2 else output + '_map'
-    dc_output = f'{stem[0]}_dc.{stem[1]}' if len(stem) == 2 else output + '_dc'
+    ext = f'.{stem[1]}' if len(stem) == 2 else ''
+    map_output   = f'{stem[0]}_map{ext}'
+    dc_output    = f'{stem[0]}_dc{ext}'
+    entr_output  = f'{stem[0]}_entr{ext}'
 
     # Figure 1: region map
     fig_map, ax_map = plt.subplots(subplot_kw={'projection': ccrs.PlateCarree()}, figsize=(6, 5))
@@ -126,6 +127,30 @@ def plot(cycles, output):
     fig_dc.savefig(dc_output, dpi=100)
     print(f'Saved {dc_output}')
     plt.close(fig_dc)
+
+    # Figure 3: entrainment proxies
+    fig_entr, (ax_weff, ax_tbdiff) = plt.subplots(1, 2, figsize=(10, 4), layout='constrained')
+    fig_entr.suptitle(
+        f'Entrainment proxies over Burkina Faso ({BF_LAT_MIN}–{BF_LAT_MAX}°N, '
+        f'{BF_LON_MIN}–{BF_LON_MAX}°E)'
+    )
+    for ax, var, ylabel in [
+        (ax_weff,   'w_eff',   'w / $\\sqrt{\\mathrm{CAPE}}$ (m s$^{-1}$ (J kg$^{-1}$)$^{-0.5}$)'),
+        (ax_tbdiff, 'tb_diff', '$T_b - T_{\\mathrm{LNB}}$ (K)'),
+    ]:
+        for season, color in [('jja', 'tab:orange'), ('djf', 'tab:blue')]:
+            mean, std = cycles[f'{var}_{season}']
+            ax.plot(hours, mean, label=season.upper(), color=color)
+            ax.fill_between(hours, mean - std, mean + std, alpha=0.2, color=color)
+        ax.axhline(0, color='k', linewidth=0.8, linestyle='--')
+        ax.set_xlabel('Hour (UTC)')
+        ax.set_ylabel(ylabel)
+        ax.set_xticks(hours)
+        ax.legend()
+        ax.set_title(ylabel.split(' (')[0])
+    fig_entr.savefig(entr_output, dpi=100)
+    print(f'Saved {entr_output}')
+    plt.close(fig_entr)
 
 
 def main():
