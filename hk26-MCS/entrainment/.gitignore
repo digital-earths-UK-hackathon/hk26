@@ -12,6 +12,9 @@ logs/
 # Jupyter
 .ipynb_checkpoints/
 
+# Output figures
+figs/
+
 # Editor swap files
 *.swp
 *.swo
