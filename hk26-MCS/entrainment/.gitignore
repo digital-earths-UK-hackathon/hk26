@@ -1,0 +1,17 @@
+# Data stores
+*.zarr/
+
+# Sentinel and log directories
+*_done/
+logs/
+
+# Script output and logs
+*.out
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editor swap files
+*.swp
+*.swo
