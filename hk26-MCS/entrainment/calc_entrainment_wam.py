@@ -25,7 +25,7 @@ from metpy.units import units
 SIM = 'um_glm_n2560_RAL3p3_tuned_hk26'
 ZOOM = 9
 CATALOG_URL = 'https://digital-earths-global-hackathon.github.io/catalog/catalog.yaml'
-CHUNK_SIZE = 80          # 10 days × 8 timesteps/day at 3-hourly
+CHUNK_SIZE = 10          # one timestep per CPU (= N_WORKERS)
 N_WORKERS = 10
 ZARR_PATH = Path('entrainment_wam.zarr')
 DONE_DIR = Path('entrainment_done')
@@ -151,7 +151,7 @@ def _worker(args):
     cin_arr = np.empty(n_cells, dtype=np.float32)
     lnb_arr = np.empty(n_cells, dtype=np.float32)
     t_lnb_arr = np.empty(n_cells, dtype=np.float32)
-    for i in range(n_cells)[:5]:
+    for i in range(n_cells):
         cape_arr[i], cin_arr[i], lnb_arr[i], t_lnb_arr[i] = calc_profile(
             ta_t[:, i], hur_t[:, i], p_hpa
         )

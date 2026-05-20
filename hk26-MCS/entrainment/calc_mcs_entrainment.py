@@ -25,6 +25,7 @@ warnings.filterwarnings('ignore', message='.*The return type of `Dataset.dims`.*
 ENTRAINMENT_ZARR = Path('entrainment_wam.zarr')
 OUTPUT_NC = Path('mcs_entrainment_wam.nc')
 ZOOM = 9
+# MM: should this not be 400 to match tracks?
 MAX_TIMES_3H = 217          # ceil(650 h / 3 h): steps 0,3,6,...,648
 
 MASK_URL = (
@@ -93,6 +94,7 @@ def compute_wam_positions(entr_ds, mask_ds):
 
     # global_cells is 0,1,2,...,N-1 so positions == wam_cells, but use searchsorted
     # for correctness in case of non-contiguous ranges.
+    # MM: explain searchsorted.
     positions = np.searchsorted(global_cells, wam_cells)
     assert np.all(global_cells[positions] == wam_cells), \
         'WAM cell indices not found in global mask — zoom mismatch?'
@@ -133,24 +135,15 @@ def align_times(entr_ds, mask_ds):
     entr_times = entr_ds.time.values
     mask_times = mask_ds.time.values
 
-    # Build set of (y, m, d, h) tuples from mask for fast lookup
-    def to_tuples(times):
-        return {
-            (pd.Timestamp(t).year, pd.Timestamp(t).month,
-             pd.Timestamp(t).day,  pd.Timestamp(t).hour): i
-            for i, t in enumerate(times)
-        }
-
-    mask_tuple_to_idx = to_tuples(mask_times)
+    mask_time_to_idx = {pd.Timestamp(t): i for i, t in enumerate(mask_times)}
 
     overlap_entr_idx = []
     overlap_mask_idx = []
     for i, t in enumerate(entr_times):
         ts = pd.Timestamp(t)
-        key = (ts.year, ts.month, ts.day, ts.hour)
-        if key in mask_tuple_to_idx:
+        if ts in mask_time_to_idx:
             overlap_entr_idx.append(i)
-            overlap_mask_idx.append(mask_tuple_to_idx[key])
+            overlap_mask_idx.append(mask_time_to_idx[ts])
 
     print(f'Overlap: {len(overlap_entr_idx)} 3-hourly timesteps '
           f'({pd.Timestamp(entr_times[overlap_entr_idx[0]])} – '
@@ -179,6 +172,7 @@ def bincount_mean_std(mask_int, values, max_label):
     vals = np.where(valid, values.astype(np.float64), 0.0)
 
     minlen = max_label + 1
+    # MM: explain bincount.
     counts  = np.bincount(mask_work, minlength=minlen)
     sums    = np.bincount(mask_work, weights=vals,    minlength=minlen)
     sum_sq  = np.bincount(mask_work, weights=vals**2, minlength=minlen)
@@ -206,9 +200,10 @@ def compute_track_entrainment(entr_ds, mask_ds, dstracks_wam,
     max_label  = int(dstracks_wam.tracks.values.max()) + 1  # mask value = track_idx + 1
 
     # Map mask track number → output row index
-    track_nums = dstracks_wam.tracks.values.astype(int)   # 0-indexed track IDs
+    track_nums = dstracks_wam.tracks.values.astype(int)   # original track indices from full dstracks (sparse after WAM filter)
     mask_num_to_out_idx = np.full(max_label + 1, -1, dtype=np.int32)
     for out_i, tn in enumerate(track_nums):
+        # MM: Where does the +1 come from?
         mask_num_to_out_idx[tn + 1] = out_i    # mask value = track_idx + 1
 
     # First 3-hourly step index for each WAM track (index into times_3h array)
