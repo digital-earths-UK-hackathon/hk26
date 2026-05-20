@@ -1,5 +1,6 @@
 # Data stores
 *.zarr/
+*.nc
 
 # Sentinel and log directories
 *_done/

@@ -25,15 +25,10 @@ from metpy.units import units
 SIM = 'um_glm_n2560_RAL3p3_tuned_hk26'
 ZOOM = 9
 CATALOG_URL = 'https://digital-earths-global-hackathon.github.io/catalog/catalog.yaml'
-CHUNK_SIZE = 80          # 10 days × 8 timesteps/day at 3-hourly
+CHUNK_SIZE = 10          # one timestep per CPU (= N_WORKERS)
 N_WORKERS = 10
 ZARR_PATH = Path('entrainment_wam.zarr')
 DONE_DIR = Path('entrainment_done')
-
-# Brightness temperature constants
-SIGMA = 5.67e-8      # Stefan-Boltzmann constant (W m-2 K-4)
-TB_A = 1.228
-TB_B = -1.106e-3
 
 warnings.filterwarnings('ignore', message='.*The return type of `Dataset.dims`.*', category=FutureWarning)
 warnings.filterwarnings('ignore', message='.*Relative humidity >120%.*', category=UserWarning)
@@ -156,11 +151,29 @@ def _worker(args):
     cin_arr = np.empty(n_cells, dtype=np.float32)
     lnb_arr = np.empty(n_cells, dtype=np.float32)
     t_lnb_arr = np.empty(n_cells, dtype=np.float32)
-    for i in range(n_cells)[:5]:
+    for i in range(n_cells):
         cape_arr[i], cin_arr[i], lnb_arr[i], t_lnb_arr[i] = calc_profile(
             ta_t[:, i], hur_t[:, i], p_hpa
         )
     return cape_arr, cin_arr, lnb_arr, t_lnb_arr
+
+
+# ---------------------------------------------------------------------------
+# Brightness temperature  (Yang & Slingo 2001 / Minnis & Harrison 1984)
+# ---------------------------------------------------------------------------
+
+def olr_to_tb(olr):
+    """Convert OLR (W m-2) to IR brightness temperature (K).
+
+    Tf = (OLR/sigma)^0.25,  Tb = (-a + sqrt(a^2 + 4*b*Tf)) / (2*b)
+    where a=1.228, b=-1.106e-3 K^-1, sigma=5.67e-8 W m-2 K-4.
+    Source: PyFLEXTRKR ftfunctions.py (Yang & Slingo 2001).
+    """
+    a = 1.228
+    b = -1.106e-3
+    sigma = 5.67e-8
+    tf = (olr / sigma) ** 0.25
+    return (-a + np.sqrt(a**2 + 4 * b * tf)) / (2 * b)
 
 
 # ---------------------------------------------------------------------------
@@ -214,8 +227,7 @@ def compute_chunk(chunk_idx, n_timesteps=None):
     w_eff_out = wa_np / np.sqrt(cape_safe)          # (n_chunk, n_cells)
 
     # Brightness temperature from OLR.
-    Tf = (rlut_np / SIGMA) ** 0.25
-    tb_out = (TB_A + np.sqrt(TB_A**2 - 4 * TB_B * Tf)) / (2 * TB_B)
+    tb_out = olr_to_tb(rlut_np)
 
     tb_diff_out = tb_out - t_lnb_out
 
