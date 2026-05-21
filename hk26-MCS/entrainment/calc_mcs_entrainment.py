@@ -8,6 +8,8 @@ PyFLEXTRKR output conventions.
 Usage:
     python calc_mcs_entrainment.py
     python calc_mcs_entrainment.py --output mcs_entrainment_wam.nc
+    python calc_mcs_entrainment.py --surface land --output mcs_entrainment_wam_land.nc
+    python calc_mcs_entrainment.py --surface ocean --output mcs_entrainment_wam_ocean.nc
 """
 import argparse
 import warnings
@@ -123,6 +125,34 @@ def filter_wam_tracks(dstracks):
     dstracks_wam = dstracks.isel(tracks=in_wam)
     print(f'  {int(in_wam.sum())} / {dstracks.sizes["tracks"]} tracks pass WAM filter')
     return dstracks_wam
+
+
+LAND_FRAC_THRESHOLD  = 0.8   # mean pf_landfrac above this → land MCS
+OCEAN_FRAC_THRESHOLD = 0.2   # mean pf_landfrac below this → ocean MCS
+
+
+def filter_surface(dstracks, surface):
+    """
+    Filter tracks by mean land fraction (pf_landfrac, expressed as 0–1).
+      'land'  : mean pf_landfrac > 0.8
+      'ocean' : mean pf_landfrac < 0.2
+      'all'   : no filter (default)
+    """
+    if surface == 'all':
+        return dstracks
+
+    print(f'Filtering tracks by surface type: {surface}...')
+    dstracks.pf_landfrac.load()
+    mean_lf = np.nanmean(dstracks.pf_landfrac.values, axis=1)  # (tracks,)
+
+    if surface == 'land':
+        mask = mean_lf > LAND_FRAC_THRESHOLD
+    else:  # ocean
+        mask = mean_lf < OCEAN_FRAC_THRESHOLD
+
+    filtered = dstracks.isel(tracks=mask)
+    print(f'  {int(mask.sum())} / {dstracks.sizes["tracks"]} tracks pass {surface} filter')
+    return filtered
 
 
 def align_times(entr_ds, mask_ds):
@@ -357,6 +387,8 @@ def main():
     parser.add_argument('--output', default=str(OUTPUT_NC), help='Output NetCDF path')
     parser.add_argument('--n-timesteps', type=int, default=None, metavar='N',
                         help='Limit to first N timesteps (for testing)')
+    parser.add_argument('--surface', choices=['all', 'land', 'ocean'], default='all',
+                        help='Filter MCS by mean land fraction: land (>0.8), ocean (<0.2), all (default)')
     args = parser.parse_args()
 
     dstracks      = load_track_stats()
@@ -365,6 +397,7 @@ def main():
 
     wam_positions = compute_wam_positions(entr_ds, mask_ds)
     dstracks_wam  = filter_wam_tracks(dstracks)
+    dstracks_wam  = filter_surface(dstracks_wam, args.surface)
 
     entr_idxs, mask_idxs, times_3h = align_times(entr_ds, mask_ds)
 

@@ -88,7 +88,7 @@ def init_zarr(ds):
                                   attrs={'units': 'K',
                                          'long_name': 'Temperature at level of neutral buoyancy'}),
             'w_eff': xr.DataArray(empty, dims=['time', 'cell'],
-                                  attrs={'units': 'm s-1 (J kg-1)-0.5',
+                                  attrs={'units': '-',
                                          'long_name': 'Vertical velocity at 500 hPa normalised by sqrt(CAPE)'}),
             'tb': xr.DataArray(empty, dims=['time', 'cell'],
                                attrs={'units': 'K',

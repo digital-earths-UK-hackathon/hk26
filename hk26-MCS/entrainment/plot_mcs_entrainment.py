@@ -1,11 +1,12 @@
 """
 Plot entrainment statistics linked to MCS tracks.
 
-Two figures:
+Three figures:
   1. Lifecycle composite — each entrainment variable vs normalised lifecycle
      fraction (0 = start, 1 = end), split by JJA / DJF and duration category.
   2. MCS entrainment diurnal cycle — compare MCS-cell entrainment vs the
      all-cell background diurnal cycle, split by JJA / DJF.
+  3. Distributions — histograms of all key variables (JJA vs DJF).
 
 Usage:
     python plot_mcs_entrainment.py
@@ -19,12 +20,15 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-ENTR_VARS = ['cape', 'cin', 'lnb', 'w_eff', 'tb_diff']
+MODEL = 'UM N2560 RAL3.3'
+
+ENTR_VARS = ['cape', 'cin', 'lnb', 'tb', 'w_eff', 'tb_diff']
 VAR_LABELS = {
     'cape':    'CAPE (J kg$^{-1}$)',
     'cin':     'CIN (J kg$^{-1}$)',
     'lnb':     'LNB pressure (hPa)',
-    'w_eff':   'w / $\\sqrt{\\mathrm{CAPE}}$ (m s$^{-1}$ (J kg$^{-1}$)$^{-0.5}$)',
+    'w_eff':   'w / $\\sqrt{\\mathrm{CAPE}}$ (-)',
+    'tb':      '$T_b$ (K)',
     'tb_diff': '$T_b - T_{\\mathrm{LNB}}$ (K)',
 }
 VAR_INVERT = {'lnb': True}   # invert y-axis for pressure
@@ -53,43 +57,56 @@ def season_mask(times):
 
 def compute_lifecycle_composite(ds, var, season_bool=None):
     """
-    Composite mean and IQR of `var_mean` as a function of lifecycle fraction.
-    Only uses timesteps where n_wam_cells > 0.
+    Composite median and IQR of `var_mean` as a function of lifecycle fraction,
+    giving each track equal weight.
+
+    For each track, valid (fraction, value) pairs are linearly interpolated onto
+    the fixed bin-midpoint grid; points outside the track's observed range are
+    NaN.  The median and IQR are then taken across tracks at each grid point.
 
     Returns (bin_centres, composite_median, composite_q25, composite_q75).
     """
-    mean_vals = ds[f'{var}_mean'].values          # (tracks, times_3h)
-    n_cells   = ds['n_wam_cells'].values           # (tracks, times_3h)
-    dur       = ds['track_duration_3h'].values     # (tracks,)
+    mean_vals = ds[f'{var}_mean'].values       # (tracks, times_3h)
+    n_cells   = ds['n_wam_cells'].values       # (tracks, times_3h)
+    dur       = ds['track_duration_3h'].values # (tracks,)
 
-    bins  = np.linspace(0, 1, N_LIFECYCLE_BINS + 1)
-    mids  = (bins[:-1] + bins[1:]) / 2
+    mids = (np.linspace(0, 1, N_LIFECYCLE_BINS + 1)[:-1]
+            + np.linspace(0, 1, N_LIFECYCLE_BINS + 1)[1:]) / 2
 
-    all_vals = [[] for _ in range(N_LIFECYCLE_BINS)]
+    track_interps = []
 
     for ti in range(ds.sizes['tracks']):
+        if season_bool is not None and not season_bool[ti]:
+            continue
         d = int(dur[ti])
         if d <= 0:
             continue
+
+        fracs, vals = [], []
         for li in range(min(d, ds.sizes['times_3h'])):
             if n_cells[ti, li] == 0:
                 continue
             v = mean_vals[ti, li]
             if not np.isfinite(v):
                 continue
-            # Lifecycle fraction at the MIDPOINT of this step
-            frac = (li + 0.5) / d
+            fracs.append((li + 0.5) / d)
+            vals.append(v)
 
-            if season_bool is not None and not season_bool[ti]:
-                continue
+        if len(fracs) < 2:
+            continue
 
-            bin_idx = int(frac * N_LIFECYCLE_BINS)
-            bin_idx = min(bin_idx, N_LIFECYCLE_BINS - 1)
-            all_vals[bin_idx].append(v)
+        # Interpolate onto fixed grid; NaN outside the track's observed range.
+        interp = np.interp(mids, fracs, vals, left=np.nan, right=np.nan)
+        track_interps.append(interp)
 
-    medians = np.array([np.nanmedian(b) if b else np.nan for b in all_vals])
-    q25     = np.array([np.nanpercentile(b, 25) if b else np.nan for b in all_vals])
-    q75     = np.array([np.nanpercentile(b, 75) if b else np.nan for b in all_vals])
+    nans = np.full(N_LIFECYCLE_BINS, np.nan)
+    if not track_interps:
+        return mids, nans, nans, nans
+
+    arr     = np.array(track_interps)           # (n_tracks, N_LIFECYCLE_BINS)
+    medians = np.nanmedian(arr, axis=0)
+    q25     = np.nanpercentile(arr, 25, axis=0)
+    q75     = np.nanpercentile(arr, 75, axis=0)
 
     return mids, medians, q25, q75
 
@@ -103,22 +120,24 @@ def get_track_season_bool(ds, season='jja'):
     return np.isin(months, [12, 1, 2])
 
 
-def plot_lifecycle(ds, output_dir):
+def plot_lifecycle(ds, output_dir, stem):
     jja_mask = get_track_season_bool(ds, 'jja')
     djf_mask = get_track_season_bool(ds, 'djf')
 
     n_vars = len(ENTR_VARS)
     fig, axes = plt.subplots(1, n_vars, figsize=(4 * n_vars, 4), layout='constrained')
-    fig.suptitle('MCS entrainment lifecycle composite (WAM region)')
+    fig.suptitle(f'MCS entrainment lifecycle composite (WAM region) — {MODEL}')
 
     for ax, var in zip(axes, ENTR_VARS):
+        mean_line_vals = []
         for mask, label, color in [
-            (jja_mask, 'JJA', 'tab:orange'),
-            (djf_mask, 'DJF', 'tab:blue'),
+            (jja_mask, f'JJA (N={jja_mask.sum()})', 'tab:orange'),
+            (djf_mask, f'DJF (N={djf_mask.sum()})', 'tab:blue'),
         ]:
             mids, med, q25, q75 = compute_lifecycle_composite(ds, var, mask)
             ax.plot(mids, med, color=color, label=label)
             ax.fill_between(mids, q25, q75, alpha=0.2, color=color)
+            mean_line_vals.extend(med[np.isfinite(med)])
 
         ax.set_xlabel('Lifecycle fraction')
         ax.set_ylabel(VAR_LABELS[var])
@@ -128,8 +147,12 @@ def plot_lifecycle(ds, output_dir):
             ax.invert_yaxis()
         if var in ('cin', 'tb_diff', 'w_eff'):
             ax.axhline(0, color='k', linewidth=0.8, linestyle='--')
+        if var == 'w_eff' and mean_line_vals:
+            lo, hi = min(mean_line_vals), max(mean_line_vals)
+            margin = max((hi - lo) * 0.15, 1e-4)
+            ax.set_ylim(lo - margin, hi + margin)
 
-    out = Path(output_dir) / 'mcs_lifecycle_entrainment.png'
+    out = Path(output_dir) / f'{stem}.mcs_lifecycle_entrainment.png'
     fig.savefig(out, dpi=100)
     print(f'Saved {out}')
     plt.close(fig)
@@ -186,19 +209,24 @@ def compute_mcs_diurnal_cycle(ds, var):
     return hours, *agg(jja_by_hour), *agg(djf_by_hour)
 
 
-def plot_mcs_diurnal_cycle(ds, output_dir):
+def plot_mcs_diurnal_cycle(ds, output_dir, stem):
+    jja_mask = get_track_season_bool(ds, 'jja')
+    djf_mask = get_track_season_bool(ds, 'djf')
+
     n_vars = len(ENTR_VARS)
     fig, axes = plt.subplots(1, n_vars, figsize=(4 * n_vars, 4), layout='constrained')
-    fig.suptitle('MCS entrainment diurnal cycle (WAM region, MCS cells only)')
+    fig.suptitle(f'MCS entrainment diurnal cycle (WAM region, MCS cells only) — {MODEL}')
 
     for ax, var in zip(axes, ENTR_VARS):
         hours, jja_m, jja_s, djf_m, djf_s = compute_mcs_diurnal_cycle(ds, var)
+        mean_line_vals = []
         for mean, std, label, color in [
-            (jja_m, jja_s, 'JJA', 'tab:orange'),
-            (djf_m, djf_s, 'DJF', 'tab:blue'),
+            (jja_m, jja_s, f'JJA (N={jja_mask.sum()})', 'tab:orange'),
+            (djf_m, djf_s, f'DJF (N={djf_mask.sum()})', 'tab:blue'),
         ]:
             ax.plot(hours, mean, color=color, label=label)
             ax.fill_between(hours, mean - std, mean + std, alpha=0.2, color=color)
+            mean_line_vals.extend(mean[np.isfinite(mean)])
 
         ax.set_xlabel('Hour (UTC)')
         ax.set_ylabel(VAR_LABELS[var])
@@ -209,8 +237,97 @@ def plot_mcs_diurnal_cycle(ds, output_dir):
             ax.invert_yaxis()
         if var in ('cin', 'tb_diff', 'w_eff'):
             ax.axhline(0, color='k', linewidth=0.8, linestyle='--')
+        if var == 'w_eff' and mean_line_vals:
+            lo, hi = min(mean_line_vals), max(mean_line_vals)
+            margin = max((hi - lo) * 0.15, 1e-4)
+            ax.set_ylim(lo - margin, hi + margin)
 
-    out = Path(output_dir) / 'mcs_dc_entrainment.png'
+    out = Path(output_dir) / f'{stem}.mcs_dc_entrainment.png'
+    fig.savefig(out, dpi=100)
+    print(f'Saved {out}')
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Figure 3: variable distributions
+# ---------------------------------------------------------------------------
+
+DIST_VARS = ['cape_mean', 'cin_mean', 'lnb_mean', 't_lnb_mean', 'w_eff_mean', 'tb_mean', 'tb_diff_mean']
+DIST_LABELS = {
+    'cape_mean':    'CAPE (J kg$^{-1}$)',
+    'cin_mean':     'CIN (J kg$^{-1}$)',
+    'lnb_mean':     'LNB pressure (hPa)',
+    't_lnb_mean':   '$T_{\\mathrm{LNB}}$ (K)',
+    'w_eff_mean':   'w / $\\sqrt{\\mathrm{CAPE}}$ (-)',
+    'tb_mean':      '$T_b$ (K)',
+    'tb_diff_mean': '$T_b - T_{\\mathrm{LNB}}$ (K)',
+}
+
+
+def _valid_flat(vals, n_valid, season_bool):
+    """Return 1-D array of vals where n_valid > 0, finite, and season matches."""
+    v = vals[season_bool]       # (n_season_tracks, times_3h)
+    n = n_valid[season_bool]
+    ok = (n > 0) & np.isfinite(v)
+    return v[ok]
+
+
+def plot_distributions(ds, output_dir, stem):
+    jja_mask = get_track_season_bool(ds, 'jja')
+    djf_mask = get_track_season_bool(ds, 'djf')
+    n_valid = ds['n_wam_cells'].values     # (tracks, times_3h)
+
+    ncols = 4
+    nrows = 2
+    fig, axes = plt.subplots(nrows, ncols, figsize=(16, 7), layout='constrained')
+    axes_flat = axes.ravel()
+    fig.suptitle(f'MCS entrainment distributions (WAM region, MCS cells only) — {MODEL}')
+
+    for ax, vname in zip(axes_flat, DIST_VARS):
+        vals = ds[vname].values            # (tracks, times_3h)
+
+        # Determine bin range from full distribution (p1–p99 to exclude outliers).
+        all_flat = vals[(n_valid > 0) & np.isfinite(vals)]
+        if len(all_flat) == 0:
+            ax.set_visible(False)
+            continue
+        lo, hi = np.percentile(all_flat, [1, 99])
+        bins = np.linspace(lo, hi, 51)
+
+        for season_bool, label, color in [
+            (jja_mask, f'JJA (N={jja_mask.sum()})', 'tab:orange'),
+            (djf_mask, f'DJF (N={djf_mask.sum()})', 'tab:blue'),
+        ]:
+            v_flat = _valid_flat(vals, n_valid, season_bool)
+            ax.hist(v_flat, bins=bins, alpha=0.5, density=True, color=color, label=label)
+
+        ax.set_xlabel(DIST_LABELS[vname])
+        ax.set_ylabel('Density')
+
+        # Reference lines and annotations.
+        if vname == 'tb_mean':
+            ax.axvline(240, color='k', linestyle='--', linewidth=1, label='240 K')
+            n_above = (all_flat > 240).sum()
+            ax.text(0.97, 0.97, f'{100 * n_above / len(all_flat):.1f}% > 240 K',
+                    transform=ax.transAxes, ha='right', va='top', fontsize=7)
+        elif vname == 'tb_diff_mean':
+            ax.axvline(0, color='k', linestyle='--', linewidth=0.8)
+            ax.text(0.03, 0.97, '← overshooting', transform=ax.transAxes,
+                    ha='left', va='top', fontsize=7)
+        elif vname in ('cin_mean', 'w_eff_mean'):
+            ax.axvline(0, color='k', linestyle='--', linewidth=0.8)
+
+        # Invert x-axis for pressure (higher pressure = lower altitude).
+        if vname == 'lnb_mean':
+            ax.invert_xaxis()
+
+        ax.legend(fontsize=8)
+
+    # Hide unused axes (8 panels, 7 variables).
+    for ax in axes_flat[len(DIST_VARS):]:
+        ax.set_visible(False)
+
+    out = Path(output_dir) / f'{stem}.mcs_distributions.png'
     fig.savefig(out, dpi=100)
     print(f'Saved {out}')
     plt.close(fig)
@@ -228,12 +345,15 @@ def main():
 
     Path(args.output).mkdir(exist_ok=True)
 
+    stem = Path(args.input).stem
+
     print(f'Loading {args.input}...')
     ds = load_mcs_entrainment(args.input)
     print(ds)
 
-    plot_lifecycle(ds, args.output)
-    plot_mcs_diurnal_cycle(ds, args.output)
+    plot_lifecycle(ds, args.output, stem)
+    plot_mcs_diurnal_cycle(ds, args.output, stem)
+    plot_distributions(ds, args.output, stem)
 
 
 if __name__ == '__main__':

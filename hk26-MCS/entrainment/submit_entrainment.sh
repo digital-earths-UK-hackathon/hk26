@@ -5,10 +5,10 @@
 #   python calc_entrainment_wam.py --init
 #   sbatch submit_cape_cin.sh
 #
-# Array range 0-40 covers 3249 timesteps at 80 per chunk (ceil(3249/80) = 41 jobs).
+# Array range 0-324 covers 3249 timesteps at 10 per chunk (ceil(3249/10) = 325 jobs).
 
 #SBATCH --job-name=entrainment_wam
-#SBATCH --array=0-40
+#SBATCH --array=0-324
 #SBATCH --account=hrcm
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=10
