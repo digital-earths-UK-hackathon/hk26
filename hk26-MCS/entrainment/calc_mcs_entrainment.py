@@ -1,15 +1,14 @@
 """
-Compute per-track entrainment statistics for WAM-region MCS tracks.
+Compute per-track entrainment statistics for region-filtered MCS tracks.
 
-Links entrainment_wam.zarr (3-hourly) with the PyFLEXTRKR MCS pixel mask
+Links entrainment_<region>.zarr (3-hourly) with the PyFLEXTRKR MCS pixel mask
 (hourly, S3) to produce a NetCDF with dims (tracks, times_3h) following
 PyFLEXTRKR output conventions.
 
 Usage:
-    python calc_mcs_entrainment.py
-    python calc_mcs_entrainment.py --output mcs_entrainment_wam.nc
-    python calc_mcs_entrainment.py --surface land --output mcs_entrainment_wam_land.nc
-    python calc_mcs_entrainment.py --surface ocean --output mcs_entrainment_wam_ocean.nc
+    python calc_mcs_entrainment.py --model um_glm_n2560_RAL3p3_tuned_hk26
+    python calc_mcs_entrainment.py --model um_glm_n2560_RAL3p3_tuned_hk26 --surface land
+    python calc_mcs_entrainment.py --model um_glm_n2560_CoMA9_hk26 --region wam
 """
 import argparse
 import warnings
@@ -21,31 +20,20 @@ import pandas as pd
 import requests
 import xarray as xr
 
+import models
+
 warnings.filterwarnings('ignore', message='.*The return type of `Dataset.dims`.*', category=FutureWarning)
 
-# --- Config ---
-ENTRAINMENT_ZARR = Path('entrainment_wam.zarr')
-OUTPUT_NC = Path('mcs_entrainment_wam.nc')
-ZOOM = 9
-# MM: should this not be 400 to match tracks?
-MAX_TIMES_3H = 217          # ceil(650 h / 3 h): steps 0,3,6,...,648
-
-MASK_URL = (
-    f'https://hackathon-o.s3-ext.jc.rl.ac.uk/sim-data/analysis/PyFLEXTRKR/'
-    f'um_glm_n2560_RAL3p3_tuned_z9/mcstracking/'
-    f'mcs_mask_hp{ZOOM}_20200201.0000_20210301.0000.zarr'
-)
-STATS_URL = (
-    'https://hackathon-o.s3-ext.jc.rl.ac.uk/sim-data/analysis/PyFLEXTRKR/'
-    'um_glm_n2560_RAL3p3_tuned_z9/stats/'
-    'mcs_tracks_final_20200201.0000_20210301.0000.nc'
-)
+# ceil(650 h / 3 h): max track duration in 3-hourly steps
+MAX_TIMES_3H = 217
 
 ENTR_VARS = ['cape', 'cin', 'lnb', 't_lnb', 'w_eff', 'tb', 'tb_diff']
 
-# WAM pre-filter bounds with 5° buffer (lon in [-180, 180] convention)
-WAM_LAT_MIN_BUF, WAM_LAT_MAX_BUF = -3, 20
-WAM_LON_MIN_BUF, WAM_LON_MAX_BUF = -25, 25
+# These are set in main() from --model / --region args before any function uses them.
+ZOOM             = None
+MASK_URL         = None
+STATS_URL        = None
+ENTRAINMENT_ZARR = None
 
 
 # ---------------------------------------------------------------------------
@@ -103,28 +91,27 @@ def compute_wam_positions(entr_ds, mask_ds):
     return positions
 
 
-def filter_wam_tracks(dstracks):
+def filter_region_tracks(dstracks, region_cfg):
     """
-    Keep only tracks whose centroid enters the WAM region (with buffer)
+    Keep only tracks whose centroid enters the analysis region (with buffer)
     at any point during their lifetime.
     """
-    print('Filtering tracks to WAM region...')
+    display = region_cfg['display']
+    print(f'Filtering tracks to {display} region...')
     dstracks.meanlat.load()
     dstracks.meanlon.load()
 
-    lat = dstracks.meanlat.values          # (tracks, times)
-    lon = dstracks.meanlon.values          # (tracks, times), in [0, 360]
+    lat   = dstracks.meanlat.values        # (tracks, times)
+    lon   = dstracks.meanlon.values        # (tracks, times), in [0, 360]
+    lon180 = (lon + 180) % 360 - 180      # convert to [-180, 180]
 
-    # Convert lon to [-180, 180]
-    lon180 = (lon + 180) % 360 - 180
+    in_lat = (lat   > region_cfg['buf_lat_min']) & (lat   < region_cfg['buf_lat_max'])
+    in_lon = (lon180 > region_cfg['buf_lon_min']) & (lon180 < region_cfg['buf_lon_max'])
+    in_region = (in_lat & in_lon).any(axis=1)
 
-    in_lat = (lat > WAM_LAT_MIN_BUF) & (lat < WAM_LAT_MAX_BUF)
-    in_lon = (lon180 > WAM_LON_MIN_BUF) & (lon180 < WAM_LON_MAX_BUF)
-    in_wam = (in_lat & in_lon).any(axis=1)   # True if track ever in WAM bbox
-
-    dstracks_wam = dstracks.isel(tracks=in_wam)
-    print(f'  {int(in_wam.sum())} / {dstracks.sizes["tracks"]} tracks pass WAM filter')
-    return dstracks_wam
+    filtered = dstracks.isel(tracks=in_region)
+    print(f'  {int(in_region.sum())} / {dstracks.sizes["tracks"]} tracks pass {display} filter')
+    return filtered
 
 
 LAND_FRAC_THRESHOLD  = 0.8   # mean pf_landfrac above this → land MCS
@@ -383,21 +370,40 @@ def save_output(ds_out, output_path):
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', default=str(OUTPUT_NC), help='Output NetCDF path')
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    models.add_model_arg(parser)
+    models.add_region_arg(parser)
+    parser.add_argument('--output', default=None,
+                        help='Output NetCDF path (default: data/<model>/mcs_entrainment_<region>[_<surface>].nc)')
     parser.add_argument('--n-timesteps', type=int, default=None, metavar='N',
                         help='Limit to first N timesteps (for testing)')
     parser.add_argument('--surface', choices=['all', 'land', 'ocean'], default='all',
                         help='Filter MCS by mean land fraction: land (>0.8), ocean (<0.2), all (default)')
     args = parser.parse_args()
 
-    dstracks      = load_track_stats()
-    entr_ds       = open_entrainment()
-    mask_ds       = open_mcs_mask()
+    region_cfg = models.REGIONS[args.region]
 
-    wam_positions = compute_wam_positions(entr_ds, mask_ds)
-    dstracks_wam  = filter_wam_tracks(dstracks)
-    dstracks_wam  = filter_surface(dstracks_wam, args.surface)
+    if args.output is None:
+        suffix = f'_{args.surface}' if args.surface != 'all' else ''
+        args.output = str(
+            models.data_dir(args.model) / f'mcs_entrainment_{args.region}{suffix}.nc'
+        )
+
+    # Patch module-level URL/path constants to match the chosen model/region.
+    global ENTRAINMENT_ZARR, MASK_URL, STATS_URL, ZOOM
+    ZOOM             = models.MODELS[args.model]['zoom']
+    MASK_URL         = models.mask_url(args.model)
+    STATS_URL        = models.stats_url(args.model)
+    ENTRAINMENT_ZARR = models.data_dir(args.model) / f'entrainment_{args.region}.zarr'
+
+    dstracks         = load_track_stats()
+    entr_ds          = open_entrainment()
+    mask_ds          = open_mcs_mask()
+
+    wam_positions    = compute_wam_positions(entr_ds, mask_ds)
+    dstracks_wam     = filter_region_tracks(dstracks, region_cfg)
+    dstracks_wam     = filter_surface(dstracks_wam, args.surface)
 
     entr_idxs, mask_idxs, times_3h = align_times(entr_ds, mask_ds)
 

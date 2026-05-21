@@ -20,7 +20,9 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-MODEL = 'UM N2560 RAL3.3'
+import models
+
+MODEL = 'UM N2560 RAL3.3'   # overridden at runtime if --model is given
 
 ENTR_VARS = ['cape', 'cin', 'lnb', 'tb', 'w_eff', 'tb_diff']
 VAR_LABELS = {
@@ -338,22 +340,39 @@ def plot_distributions(ds, output_dir, stem):
 # ---------------------------------------------------------------------------
 
 def main():
+    global MODEL
+
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--input',  default='mcs_entrainment_wam.nc', help='Input NetCDF')
-    parser.add_argument('--output', default='figs',                   help='Output directory')
+    parser.add_argument('--model',  default=None, choices=list(models.MODELS),
+                        help='Model key; sets default --input, --output, and plot title')
+    parser.add_argument('--region', default='wam', choices=list(models.REGIONS),
+                        help='Analysis region (default: wam)')
+    parser.add_argument('--surface', default='all', choices=['all', 'land', 'ocean'],
+                        help='Surface type suffix for default input filename (default: all)')
+    parser.add_argument('--input',  default=None, help='Input NetCDF (overrides --model default)')
+    parser.add_argument('--output', default=None, help='Output directory (overrides --model default)')
     args = parser.parse_args()
 
-    Path(args.output).mkdir(exist_ok=True)
+    if args.model:
+        MODEL = models.MODELS[args.model]['display']
+        suffix = f'_{args.surface}' if args.surface != 'all' else ''
+        nc_input   = args.input  or str(models.data_dir(args.model) / f'mcs_entrainment_{args.region}{suffix}.nc')
+        output_dir = args.output or str(models.figs_dir(args.model))
+    else:
+        nc_input   = args.input  or f'mcs_entrainment_{args.region}.nc'
+        output_dir = args.output or 'figs'
 
-    stem = Path(args.input).stem
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-    print(f'Loading {args.input}...')
-    ds = load_mcs_entrainment(args.input)
+    stem = Path(nc_input).stem
+
+    print(f'Loading {nc_input}...')
+    ds = load_mcs_entrainment(nc_input)
     print(ds)
 
-    plot_lifecycle(ds, args.output, stem)
-    plot_mcs_diurnal_cycle(ds, args.output, stem)
-    plot_distributions(ds, args.output, stem)
+    plot_lifecycle(ds, output_dir, stem)
+    plot_mcs_diurnal_cycle(ds, output_dir, stem)
+    plot_distributions(ds, output_dir, stem)
 
 
 if __name__ == '__main__':
