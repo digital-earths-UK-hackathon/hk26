@@ -8,6 +8,7 @@
 * Jake Bland
 * Ken Rui Fong
 * Alex Baker
+* Dian-Yi Li
 
 Notebooks, data and results from last hackathon: [https://github.com/alexanderjbaker/hk25-teams](https://github.com/alexanderjbaker/hk25-teams).
 
