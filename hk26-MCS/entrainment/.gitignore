@@ -1,12 +1,17 @@
-# Data stores
+# Data stores and outputs
+data/
 *.zarr/
 *.nc
 
-# Sentinel and log directories
+# Done-file sentinels and SLURM artefacts
+donefiles/
+slurm/output/
+slurm/tasks/
+slurm/scripts/
+
+# Legacy
 *_done/
 logs/
-
-# Script output and logs
 *.out
 *.log
 
