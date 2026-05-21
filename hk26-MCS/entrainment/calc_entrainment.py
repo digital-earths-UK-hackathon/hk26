@@ -109,7 +109,7 @@ def init_zarr(model, region):
                                            'long_name': 'Brightness temperature minus T at LNB'}),
             'shear':  xr.DataArray(empty, dims=['time', 'cell'],
                                    attrs={'units': 'm s-1',
-                                          'long_name': 'Zonal wind shear u(650 hPa) - u(850 hPa)'}),
+                                          'long_name': 'Zonal wind shear u(600 hPa) - u(850 hPa)'}),
             'pr':     xr.DataArray(empty, dims=['time', 'cell'],
                                    attrs={'units': 'kg m-2 s-1',
                                           'long_name': 'Precipitation flux'}),
@@ -221,7 +221,7 @@ def compute_chunk(chunk_idx, model, region, n_timesteps=None):
     ta_np   = ds_desc.ta.compute().values
     hur_np  = ds_desc.hur.compute().values
     wa_np   = ds_chunk.wa.sel(pressure=500).compute().values
-    shear_out  = (ds_chunk.ua.sel(pressure=650).compute().values
+    shear_out  = (ds_chunk.ua.sel(pressure=600).compute().values
                 - ds_chunk.ua.sel(pressure=850).compute().values)
     hur700_out = ds_chunk.hur.sel(pressure=700).compute().values
     p_hpa   = ds_desc.pressure.values.astype(float)
