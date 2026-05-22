@@ -107,6 +107,18 @@ def init_zarr(model, region):
             'tb_diff': xr.DataArray(empty, dims=['time', 'cell'],
                                     attrs={'units': 'K',
                                            'long_name': 'Brightness temperature minus T at LNB'}),
+            'shear':  xr.DataArray(empty, dims=['time', 'cell'],
+                                   attrs={'units': 'm s-1',
+                                          'long_name': 'Zonal wind shear u(600 hPa) - u(850 hPa)'}),
+            'pr':     xr.DataArray(empty, dims=['time', 'cell'],
+                                   attrs={'units': 'kg m-2 s-1',
+                                          'long_name': 'Precipitation flux'}),
+            'prw':    xr.DataArray(empty, dims=['time', 'cell'],
+                                   attrs={'units': 'kg m-2',
+                                          'long_name': 'Precipitable water'}),
+            'hur700': xr.DataArray(empty, dims=['time', 'cell'],
+                                   attrs={'units': '%',
+                                          'long_name': 'Relative humidity at 700 hPa'}),
         },
         coords={'time': ds.time, 'cell': ds.cell, 'lat': ds.lat, 'lon': ds.lon},
     )
@@ -209,8 +221,14 @@ def compute_chunk(chunk_idx, model, region, n_timesteps=None):
     ta_np   = ds_desc.ta.compute().values
     hur_np  = ds_desc.hur.compute().values
     wa_np   = ds_chunk.wa.sel(pressure=500).compute().values
+    shear_out  = (ds_chunk.ua.sel(pressure=600).compute().values
+                - ds_chunk.ua.sel(pressure=850).compute().values)
+    hur700_out = ds_chunk.hur.sel(pressure=700).compute().values
     p_hpa   = ds_desc.pressure.values.astype(float)
-    rlut_np = ds1h.rlut.sel(time=ds_chunk.time).compute().values
+    ds1h_chunk = ds1h.sel(time=ds_chunk.time)
+    rlut_np = ds1h_chunk.rlut.compute().values
+    pr_np   = ds1h_chunk.pr.compute().values
+    prw_np  = ds1h_chunk.prw.compute().values
 
     worker_args = [(i, ta_np[i], hur_np[i], p_hpa) for i in range(n_chunk)]
 
@@ -220,7 +238,7 @@ def compute_chunk(chunk_idx, model, region, n_timesteps=None):
             print(f'  {i + 1}/{n_chunk}', flush=True)
             results.append(result)
 
-    cape_out   = np.stack([r[0] for r in results])
+    cape_out   = np.maximum(np.stack([r[0] for r in results]), 0)
     cin_out    = np.stack([r[1] for r in results])
     lnb_out    = np.stack([r[2] for r in results])
     t_lnb_out  = np.stack([r[3] for r in results])
@@ -232,13 +250,17 @@ def compute_chunk(chunk_idx, model, region, n_timesteps=None):
     tb_diff_out = tb_out - t_lnb_out
 
     ds_out = xr.Dataset({
-        'cape':    xr.DataArray(cape_out,                      dims=['time', 'cell']),
-        'cin':     xr.DataArray(cin_out,                       dims=['time', 'cell']),
-        'lnb':     xr.DataArray(lnb_out,                       dims=['time', 'cell']),
-        't_lnb':   xr.DataArray(t_lnb_out,                     dims=['time', 'cell']),
-        'w_eff':   xr.DataArray(w_eff_out,                     dims=['time', 'cell']),
-        'tb':      xr.DataArray(tb_out.astype(np.float32),     dims=['time', 'cell']),
+        'cape':    xr.DataArray(cape_out,                       dims=['time', 'cell']),
+        'cin':     xr.DataArray(cin_out,                        dims=['time', 'cell']),
+        'lnb':     xr.DataArray(lnb_out,                        dims=['time', 'cell']),
+        't_lnb':   xr.DataArray(t_lnb_out,                      dims=['time', 'cell']),
+        'w_eff':   xr.DataArray(w_eff_out,                      dims=['time', 'cell']),
+        'tb':      xr.DataArray(tb_out.astype(np.float32),      dims=['time', 'cell']),
         'tb_diff': xr.DataArray(tb_diff_out.astype(np.float32), dims=['time', 'cell']),
+        'shear':   xr.DataArray(shear_out.astype(np.float32),   dims=['time', 'cell']),
+        'pr':      xr.DataArray(pr_np.astype(np.float32),        dims=['time', 'cell']),
+        'prw':     xr.DataArray(prw_np.astype(np.float32),       dims=['time', 'cell']),
+        'hur700':  xr.DataArray(hur700_out.astype(np.float32),   dims=['time', 'cell']),
     })
     ds_out.to_zarr(zarr_path, region={'time': slice(t_start, t_end)})
 

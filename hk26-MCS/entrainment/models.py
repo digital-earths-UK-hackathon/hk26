@@ -65,7 +65,7 @@ def stats_url(model):
 # ---------------------------------------------------------------------------
 
 def data_dir(model):
-    return Path('data') / model
+    return Path('/work/scratch-nopw2/mmuetz/hk26/hk26-MCS/entrainment/data') / model
 
 
 def figs_dir(model):

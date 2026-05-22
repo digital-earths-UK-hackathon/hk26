@@ -27,7 +27,7 @@ warnings.filterwarnings('ignore', message='.*The return type of `Dataset.dims`.*
 # ceil(650 h / 3 h): max track duration in 3-hourly steps
 MAX_TIMES_3H = 217
 
-ENTR_VARS = ['cape', 'cin', 'lnb', 't_lnb', 'w_eff', 'tb', 'tb_diff']
+ENTR_VARS = ['cape', 'cin', 'lnb', 't_lnb', 'w_eff', 'tb', 'tb_diff', 'shear', 'pr', 'prw', 'hur700']
 
 # These are set in main() from --model / --region args before any function uses them.
 ZOOM             = None

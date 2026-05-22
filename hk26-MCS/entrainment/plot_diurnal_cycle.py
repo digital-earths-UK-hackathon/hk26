@@ -74,12 +74,12 @@ def plot_region_map(ax, region_cfg, model_display, region_display):
         linewidth=1.5, edgecolor='steelblue', facecolor='steelblue',
         alpha=0.15, transform=crs, label=f'{region_display} region',
     ))
-    ax.add_patch(mpatches.Rectangle(
-        (BF_LON_MIN, BF_LAT_MIN),
-        BF_LON_MAX - BF_LON_MIN, BF_LAT_MAX - BF_LAT_MIN,
-        linewidth=2, edgecolor='tab:orange', facecolor='none',
-        transform=crs, label='Burkina Faso box',
-    ))
+    # ax.add_patch(mpatches.Rectangle(
+    #     (BF_LON_MIN, BF_LAT_MIN),
+    #     BF_LON_MAX - BF_LON_MIN, BF_LAT_MAX - BF_LAT_MIN,
+    #     linewidth=2, edgecolor='tab:orange', facecolor='none',
+    #     transform=crs, label='Burkina Faso box',
+    # ))
     ax.legend(loc='lower right', fontsize=8)
     ax.set_title(f'Analysis regions — {model_display}')
 
