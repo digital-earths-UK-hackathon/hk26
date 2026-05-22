@@ -308,9 +308,9 @@ def plot_distributions(ds, output_dir, stem):
 
         # Reference lines and annotations.
         if vname == 'tb_mean':
-            ax.axvline(240, color='k', linestyle='--', linewidth=1, label='240 K')
-            n_above = (all_flat > 240).sum()
-            ax.text(0.97, 0.97, f'{100 * n_above / len(all_flat):.1f}% > 240 K',
+            ax.axvline(241, color='k', linestyle='--', linewidth=1, label='241 K')
+            n_above = (all_flat > 241).sum()
+            ax.text(0.97, 0.97, f'{100 * n_above / len(all_flat):.1f}% > 241 K',
                     transform=ax.transAxes, ha='right', va='top', fontsize=7)
         elif vname == 'tb_diff_mean':
             ax.axvline(0, color='k', linestyle='--', linewidth=0.8)
