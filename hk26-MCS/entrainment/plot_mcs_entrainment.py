@@ -336,6 +336,93 @@ def plot_distributions(ds, output_dir, stem):
 
 
 # ---------------------------------------------------------------------------
+# Figures 4 & 5: x-variable vs entrainment proxies (hexbin)
+# ---------------------------------------------------------------------------
+
+ENTR_PROXY_VARS = [
+    ('w_eff_mean',   VAR_LABELS['w_eff'],   False, (-0.2, 0.5)),
+    ('tb_diff_mean', VAR_LABELS['tb_diff'],  True,  None),
+]
+
+
+def _plot_x_vs_entr(ds, x_vals, x_label, title, output_path, include_line=False):
+    jja_mask = get_track_season_bool(ds, 'jja')
+    djf_mask = get_track_season_bool(ds, 'djf')
+    n_valid  = ds['n_wam_cells'].values
+
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8), layout='constrained')
+    fig.suptitle(f'{title} — {MODEL}')
+
+    for col, (vname, ylabel, zero_line, ylim) in enumerate(ENTR_PROXY_VARS):
+        vals = ds[vname].values
+        for row, (season_bool, season_label) in enumerate([
+            (jja_mask, 'JJA'), (djf_mask, 'DJF')
+        ]):
+            ax = axes[row, col]
+
+            ok = season_bool[:, np.newaxis] & (n_valid > 0) & np.isfinite(x_vals) & np.isfinite(vals)
+            x  = x_vals[ok]
+            y  = vals[ok]
+
+            extent = None
+            if ylim is not None:
+                extent = [x.min(), x.max(), ylim[0], ylim[1]]
+            hb = ax.hexbin(x, y, gridsize=30, cmap='YlOrRd', mincnt=1, bins='log',
+                           extent=extent)
+            plt.colorbar(hb, ax=ax, label='log10(count)')
+
+            if include_line:
+                x_bins = np.linspace(x.min(), x.max(), 31)
+                x_mids = (x_bins[:-1] + x_bins[1:]) / 2
+                bin_idx = np.clip(np.digitize(x, x_bins) - 1, 0, len(x_mids) - 1)
+                means = np.array([y[bin_idx == i].mean() if (bin_idx == i).any() else np.nan
+                                  for i in range(len(x_mids))])
+                ax.plot(x_mids, means, color='steelblue', linewidth=1.5, label='mean')
+                ax.legend(fontsize=8)
+
+            if zero_line:
+                ax.axhline(0, color='k', linewidth=0.8, linestyle='--')
+            if ylim is not None:
+                ax.set_ylim(ylim)
+
+            ax.set_xlabel(x_label)
+            ax.set_ylabel(ylabel)
+            ax.set_title(f'{season_label} (N={season_bool.sum()})')
+
+    fig.savefig(output_path, dpi=100)
+    print(f'Saved {output_path}')
+    plt.close(fig)
+
+
+def plot_rh_scatter(ds, output_dir, stem, include_line=False):
+    if 'hur700_mean' not in ds:
+        print('hur700_mean not in dataset — skipping RH scatter')
+        return
+    _plot_x_vs_entr(
+        ds,
+        x_vals=ds['hur700_mean'].values,
+        x_label='RH at 700 hPa (%)',
+        title='Entrainment proxies vs RH at 700 hPa',
+        output_path=Path(output_dir) / f'{stem}.mcs_rh_scatter.png',
+        include_line=include_line,
+    )
+
+
+def plot_shear_scatter(ds, output_dir, stem, include_line=False):
+    if 'shear_mean' not in ds:
+        print('shear_mean not in dataset — skipping shear scatter')
+        return
+    _plot_x_vs_entr(
+        ds,
+        x_vals=ds['shear_mean'].values,
+        x_label='Zonal shear u(600) − u(850 hPa) (m s$^{-1}$)',
+        title='Entrainment proxies vs zonal wind shear',
+        output_path=Path(output_dir) / f'{stem}.mcs_shear_scatter.png',
+        include_line=include_line,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -349,6 +436,8 @@ def main():
                         help='Analysis region (default: wam)')
     parser.add_argument('--surface', default='all', choices=['all', 'land', 'ocean'],
                         help='Surface type suffix for default input filename (default: all)')
+    parser.add_argument('--include-line', action='store_true', default=False,
+                        help='Overlay mean line on RH/shear scatter plots')
     parser.add_argument('--input',  default=None, help='Input NetCDF (overrides --model default)')
     parser.add_argument('--output', default=None, help='Output directory (overrides --model default)')
     args = parser.parse_args()
@@ -373,6 +462,8 @@ def main():
     plot_lifecycle(ds, output_dir, stem)
     plot_mcs_diurnal_cycle(ds, output_dir, stem)
     plot_distributions(ds, output_dir, stem)
+    plot_rh_scatter(ds, output_dir, stem, include_line=args.include_line)
+    plot_shear_scatter(ds, output_dir, stem, include_line=args.include_line)
 
 
 if __name__ == '__main__':
