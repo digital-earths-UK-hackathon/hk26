@@ -23,15 +23,15 @@ For the DYAMOND-3 year long simulations the native .pp outputs from the Met Offi
 
 As part of the K-Scale model hierarchy we also run a cyclic tropical channel (CTC) and continental scale limited area models (LAMs). The currently available CTC and LAM datasets are nested inside the Global 5km CoMA9_TBv1.2 simulation. For the CTC and each of the three LAM domains both the RAL3.3 and CoMA9_TBv1.2 science configurations are tested, with the horizontal grid spacing of these simulations 0.04 degrees (~4.4 km). In the short term the CTC and LAM datasets are stored on scratch on JASMIN, this page will be updated when the datasets are transferred to MASS storage. 
 
-CTC 4.4 km CoMA9_TBv1.2: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/CTC_km4p4_CoMA9_TBv1/field.pp/
-CTC 4.4 km RAL3.3: Not yet available on JASMIN
+**CTC 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/CTC_km4p4_CoMA9_TBv1/field.pp/  
+**CTC 4.4 km RAL3.3**: Not yet available on JASMIN  
 
-South America LAM 4.4 km CoMA9_TBv1.2: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_CoMA9_TBv1/field.pp/
-South America LAM 4.4 km RAL3.3: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_RAL3P3/field.pp/
-Africa LAM 4.4 km CoMA9_TBv1.2: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/Africa_km4p4_CoMA9_TBv1/field.pp/
-Africa LAM 4.4 km RAL3.3: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/Africa_km4p4_RAL3P3/field.pp/
-SE Asia LAM 4.4 km CoMA9_TBv1.2: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SEA_km4p4_CoMA9_TBv1/field.pp/
-SE Asia LAM 4.4 km RAL3.3: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SEA_km4p4_RAL3P3/field.pp/
+**South America LAM 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_CoMA9_TBv1/field.pp/  
+**South America LAM 4.4 km RAL3.3**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_RAL3P3/field.pp/  
+**Africa LAM 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/Africa_km4p4_CoMA9_TBv1/field.pp/  
+**Africa LAM 4.4 km RAL3.3**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/Africa_km4p4_RAL3P3/field.pp/  
+**SE Asia LAM 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SEA_km4p4_CoMA9_TBv1/field.pp/  
+**SE Asia LAM 4.4 km RAL3.3**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SEA_km4p4_RAL3P3/field.pp/  
 
 The Global 5km demonstrator simulations (and Global 10km control) are 15-day forecasts re-initialised every 3 days for the period 1 September 2020 to end August 2021. The pp output from these simulations are stored on MASS and can be accessed via JASMIN - the relevant suite IDs for accessing the dataset are below:
 
