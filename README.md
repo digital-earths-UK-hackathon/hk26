@@ -12,6 +12,10 @@ You can then open the datasets contained in [this intake 0.7 catalog](https://di
 You can find all Unified Model by looking for entried that start with `um_`, and those that were created for this hackathon
 by their `_hk26` suffix.
 
+## K-Scale R&D datasets availability and access
+
+For the DYAMOND-3 year long simulations the native .pp outputs from the Met Office Unified Model are currently available on JASMIN via the kscale group workspace. If you are not already part of the group
+
 ## JASMIN notebooks
 
 There are some notebooks that give examples of how to access the data, for example [accessing global data](notebooks/01_view_global_data.ipynb).
