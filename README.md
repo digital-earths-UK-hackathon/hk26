@@ -16,10 +16,10 @@ by their `_hk26` suffix.
 
 For the DYAMOND-3 year long simulations the native .pp outputs from the Met Office Unified Model are currently available on JASMIN via the kscale group workspace. If you are not already part of the group workspace, please follow these [instructions](https://help.jasmin.ac.uk/docs/short-term-project-storage/apply-for-access-to-a-gws/) and search kscale for the group workspace name. Below are the paths to the datasets:
 
-Global 5km RAL3.3 (explicit convection (see Bush et al., 2025)): /gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-RAL3p3-tuned/glm/field.pp/
-Global 5km CoMA9_TBv1.2 (CoMorph-A convection scheme with changes for running in the convective grey-zone): /gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-CoMA9/glm/field.pp/
-Global 10km CoMA9_TBv1.2 (science configuration as above): /gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-CoMA9/glm/field.pp/
-Global 10km GAL9 (6A convection scheme (see Willett et al., 2026)): /gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-GAL9/glm/field.pp/
+**Global 5km RAL3.3** (explicit convection [see Bush et al., 2025](https://gmd.copernicus.org/articles/18/3819/2025/)): /gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-RAL3p3-tuned/glm/field.pp/
+**Global 5km CoMA9_TBv1.2** (CoMorph-A convection scheme with changes for running in the convective grey-zone): /gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-CoMA9/glm/field.pp/
+**Global 10km CoMA9_TBv1.2** (science configuration as above): /gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-CoMA9/glm/field.pp/
+**Global 10km GAL9** (6A convection scheme see [Willett et al., 2025](https://egusphere.copernicus.org/preprints/2025/egusphere-2025-1829/)): /gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-GAL9/glm/field.pp/
 
 As part of the K-Scale model hierarchy we also run a cyclic tropical channel (CTC) and continental scale limited area models (LAMs). The currently available CTC and LAM datasets are nested inside the Global 5km CoMA9_TBv1.2 simulation. For the CTC and each of the three LAM domains both the RAL3.3 and CoMA9_TBv1.2 science configurations are tested, with the horizontal grid spacing of these simulations 0.04 degrees (~4.4 km). In the short term the CTC and LAM datasets are stored on scratch on JASMIN, this page will be updated when the datasets are transferred to MASS storage. 
 
