@@ -13,7 +13,7 @@ You can find all Unified Model by looking for entried that start with `um_`, and
 by their `_hk26` suffix.
 
 ## K-Scale R&D datasets availability and access
-
+###DYAMOND-3 simulations
 For the DYAMOND-3 year long simulations the native .pp outputs from the Met Office Unified Model are currently available on JASMIN via the kscale group workspace. If you are not already part of the group workspace, please follow these [instructions](https://help.jasmin.ac.uk/docs/short-term-project-storage/apply-for-access-to-a-gws/) and search kscale for the group workspace name. Below are the paths to the datasets:
 
 **Global 5km RAL3.3** (explicit convection [see Bush et al., 2025](https://gmd.copernicus.org/articles/18/3819/2025/)): /gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-RAL3p3-tuned/glm/field.pp/  
@@ -33,6 +33,7 @@ As part of the K-Scale model hierarchy we also run a cyclic tropical channel (CT
 **SE Asia LAM 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SEA_km4p4_CoMA9_TBv1/field.pp/  
 **SE Asia LAM 4.4 km RAL3.3**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SEA_km4p4_RAL3P3/field.pp/  
 
+###Global 5km demonstrator simulaitons (and 10km controls)
 The Global 5km demonstrator simulations (and Global 10km control) are 15-day forecasts re-initialised every 3 days for the period 1 September 2020 to end August 2021. The pp output from these simulations are stored on MASS and can be accessed via JASMIN - the relevant suite IDs for accessing the dataset are below:
 
 Global 5km CoMA9_TBv1.2: moose:/devfc/u-dp135/field.pp/ - with files of the format YYYYMMDDT0000Z_umglaa_p*.pp
