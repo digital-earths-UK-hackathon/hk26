@@ -27,8 +27,8 @@ As part of the K-Scale model hierarchy we also run a cyclic tropical channel (CT
 | --------------- | ----------- | ---------- | ------------------------- | ------------------ |
 | **CTC 4.4 km CoMA9_TBv1.2** | Cyclic tropical channel with CoMA9_TBv1.2 science config | | ``/work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/CTC_km4p4_CoMA9_TBv1/field.pp/`` | CTC_CoMA9 |
 |**CTC 4.4 km RAL3.3** | Cyclic tropical channel with RAL3.3 science config | | ``Not yet available on JASMIN`` | CTC_RAL3.3 |   
-| --------------- | ----------- | ---------- | ------------------------- | ------------------ |
-**South America LAM 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_CoMA9_TBv1/field.pp/  
+| | | | | |
+| **South America LAM 4.4 km CoMA9_TBv1.2** | South America LAM, CoMA_TBv1.2 | | ``/work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_CoMA9_TBv1/field.pp/`` | SAmer4p4_CoMA9_TBv1.2 |
 **South America LAM 4.4 km RAL3.3**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_RAL3P3/field.pp/  
 **Africa LAM 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/Africa_km4p4_CoMA9_TBv1/field.pp/  
 **Africa LAM 4.4 km RAL3.3**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/Africa_km4p4_RAL3P3/field.pp/  
