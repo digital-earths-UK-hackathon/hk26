@@ -15,19 +15,19 @@ The hierarchy includes:
 
 | Experiment name | Description | catalog ID | Path to raw model outputs | Proposed naming ID |
 | --------------- | ----------- | ---------- | ------------------------- | ------------------ |
-| **Global 5km RAL3.3** | Explicit convection [see Bush et al., 2025](https://gmd.copernicus.org/articles/18/3819/2025/)) | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-RAL3p3-tuned/glm/field.pp/``  | GLOB5RAL |
-| **Global 5km CoMA9_TBv1.2** | CoMorph-A convection scheme with changes for running in the convective grey-zone | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-CoMA9/glm/field.pp/`` | GLOB5CoMA9 |
-| **Global 10km CoMA9_TBv1.2** | CoMorph-A convection scheme with changes for running in the convective grey-zone | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-CoMA9/glm/field.pp/`` | GLOB10CoMA9 |
-| **Global 10km GAL9** | 6A convection scheme [Willett et al., 2025](https://egusphere.copernicus.org/preprints/2025/egusphere-2025-1829/)) | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-GAL9/glm/field.pp/`` | GLOB10GAL9 |
+| **Global 5km RAL3.3** | Explicit convection [see Bush et al., 2025](https://gmd.copernicus.org/articles/18/3819/2025/)) | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-RAL3p3-tuned/glm/field.pp/``  | GLOB5_RAL |
+| **Global 5km CoMA9_TBv1.2** | CoMorph-A convection scheme with changes for running in the convective grey-zone | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-CoMA9/glm/field.pp/`` | GLOB5_CoMA9 |
+| **Global 10km CoMA9_TBv1.2** | CoMorph-A convection scheme with changes for running in the convective grey-zone | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-CoMA9/glm/field.pp/`` | GLOB10_CoMA9 |
+| **Global 10km GAL9** | 6A convection scheme [Willett et al., 2025](https://egusphere.copernicus.org/preprints/2025/egusphere-2025-1829/)) | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-GAL9/glm/field.pp/`` | GLOB10_GAL9 |
 
 As part of the K-Scale model hierarchy we also run a cyclic tropical channel (CTC) and continental scale limited area models (LAMs). The currently available CTC and LAM datasets are nested inside the Global 5km CoMA9_TBv1.2 simulation. For the CTC and each of the three LAM domains both the RAL3.3 and CoMA9_TBv1.2 science configurations are tested, with the horizontal grid spacing of these simulations 0.04 degrees (~4.4 km). In the short term the CTC and LAM datasets are stored on scratch on JASMIN, this page will be updated when the datasets are transferred to MASS storage. 
 
 
 | Experiment name | Description | catalog ID | Path to raw model outputs | Proposed naming ID |
 | --------------- | ----------- | ---------- | ------------------------- | ------------------ |
-| **CTC 4.4 km CoMA9_TBv1.2** | Cyclic tropical channel with CoMA9_TBv1.2 science config | | ``/work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/CTC_km4p4_CoMA9_TBv1/field.pp/`` | CTC4CoMA9 |
-|**CTC 4.4 km RAL3.3** | Cyclic tropical channel with RAL3.3 science config | | ``Not yet available on JASMIN`` | CTCRAL3.3 |   
-
+| **CTC 4.4 km CoMA9_TBv1.2** | Cyclic tropical channel with CoMA9_TBv1.2 science config | | ``/work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/CTC_km4p4_CoMA9_TBv1/field.pp/`` | CTC_CoMA9 |
+|**CTC 4.4 km RAL3.3** | Cyclic tropical channel with RAL3.3 science config | | ``Not yet available on JASMIN`` | CTC_RAL3.3 |   
+| --------------- | ----------- | ---------- | ------------------------- | ------------------ |
 **South America LAM 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_CoMA9_TBv1/field.pp/  
 **South America LAM 4.4 km RAL3.3**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SAmer_km4p4_RAL3P3/field.pp/  
 **Africa LAM 4.4 km CoMA9_TBv1.2**: /work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/Africa_km4p4_CoMA9_TBv1/field.pp/  
