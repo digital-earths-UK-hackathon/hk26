@@ -16,7 +16,7 @@ The hierarchy includes:
 | Experiment name | Description | catalog ID | Path to raw model outputs | Proposed naming ID |
 | --------------- | ----------- | ---------- | ------------------------- | ------------------ |
 | **Global 5km RAL3.3** | Explicit convection [see Bush et al., 2025](https://gmd.copernicus.org/articles/18/3819/2025/)) | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-RAL3p3-tuned/glm/field.pp/``  | GLOB5RAL |
-
+| **Global 5km CoMA9_TBv1.2** | CoMorph-A convection scheme with changes for running in the convective grey-zone | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-CoMA9/glm/field.pp/`` | GLOB5CoMA9 |
 **Global 5km CoMA9_TBv1.2** (CoMorph-A convection scheme with changes for running in the convective grey-zone): /gws/ssde/j25b/kscale/DYAMOND3_reruns/5km-CoMA9/glm/field.pp/  
 **Global 10km CoMA9_TBv1.2** (science configuration as above): /gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-CoMA9/glm/field.pp/  
 **Global 10km GAL9** (6A convection scheme see [Willett et al., 2025](https://egusphere.copernicus.org/preprints/2025/egusphere-2025-1829/)): /gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-GAL9/glm/field.pp/  
