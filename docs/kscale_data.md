@@ -20,7 +20,12 @@ The hierarchy includes:
 | **Global 10km CoMA9_TBv1.2** | CoMorph-A convection scheme with changes for running in the convective grey-zone | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-CoMA9/glm/field.pp/`` | GLOB10_CoMA9 |
 | **Global 10km GAL9** | 6A convection scheme [Willett et al., 2025](https://egusphere.copernicus.org/preprints/2025/egusphere-2025-1829/)) | | ``/gws/ssde/j25b/kscale/DYAMOND3_reruns/10km-GAL9/glm/field.pp/`` | GLOB10_GAL9 |
 
-As part of the K-Scale model hierarchy we also run a cyclic tropical channel (CTC) and continental scale limited area models (LAMs). The currently available CTC and LAM datasets are nested inside the Global 5km CoMA9_TBv1.2 simulation. For the CTC and each of the three LAM domains both the RAL3.3 and CoMA9_TBv1.2 science configurations are tested, with the horizontal grid spacing of these simulations 0.04 degrees (~4.4 km). In the short term the CTC and LAM datasets are stored on scratch on JASMIN, this page will be updated when the datasets are transferred to MASS storage. 
+As part of the K-Scale model hierarchy we also run a cyclic tropical channel (CTC) and continental scale limited area models (LAMs). 
+
+- Currently available CTC and LAM datasets are nested inside the Global 5km CoMA9_TBv1.2 simulation.
+- For the CTC and each of the three LAM domains both the RAL3.3 and CoMA9_TBv1.2 science configurations are tested.
+- All CTC and LAM simulations use domains with common grid spacing of 0.04 degrees (~4.4 km).
+- In the short term the CTC and LAM datasets are stored on scratch on JASMIN. This page will be updated when the datasets are transferred to MASS storage. 
 
 
 | Experiment name | Description | catalog ID | Path to raw model outputs | Proposed naming ID |
@@ -35,11 +40,15 @@ As part of the K-Scale model hierarchy we also run a cyclic tropical channel (CT
 | **SE Asia LAM 4.4 km CoMA9_TBv1.2** | SE Asia LAM, CoMA9_TBv1.2 | | ``/work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SEA_km4p4_CoMA9_TBv1/field.pp/`` | SEA4p4_CoMA9 |  
 | **SE Asia LAM 4.4 km RAL3.3** | SE Asia LAM, RAL3.3 | |``/work/scratch-pw5/rwjones/kscale/DYAMOND3_reruns/5km-CoMA9/SEA_km4p4_RAL3P3/field.pp/`` | SEA4p4_RAL3.3 |
 
-### Global 5km demonstrator simulaitons (and 10km controls)
-The Global 5km demonstrator simulations (and Global 10km control) are 15-day forecasts re-initialised every 3 days for the period 1 September 2020 to end August 2021. The pp output from these simulations are stored on MASS and can be accessed via JASMIN - the relevant suite IDs for accessing the dataset are below:
+### Global 5km demonstrator simulations (and 10km controls)
+The Global 5km demonstrator simulations (and Global 10km control) are 15-day forecasts re-initialised every 3 days from Met Office global analyses for the period 1 September 2020 to end August 2021. Forecasts are atmosphere-ocean coupled, with a ORCA12 global NEMO ocean configuration. 
 
-Global 5km CoMA9_TBv1.2: moose:/devfc/u-dp135/field.pp/ - with files of the format YYYYMMDDT0000Z_umglaa_p*.pp
-Global 10km CoMA9_TBv1.2: moose:/devfc/u-dq613/field.pp/ - with files of the format YYYYMMDDT0000Z_umglaa_p*.pp
-Global 10km GAL9 control: suite ID to be added soon
+The native-grid ``pp`` output files from these simulations are stored on MASS and can be accessed via JASMIN - the relevant suite IDs for accessing the dataset are below:
+
+| Experiment name | Description | Archive of raw model outputs | File format |
+| --------------- | ----------- | ------------------------- | ------------------ |
+| Global 5km CoMA9_TBv1.2 | Global coupled forecasts, 5km grid spacing, CoMorph-A convection scheme with changes for running in the convective grey-zone | ``moose:/devfc/u-dp135/field.pp/`` | ``YYYYMMDDT0000Z_umglaa_p*.pp`` |
+| Global 10km CoMA9_TBv1.2 | Global coupled forecasts, 10km grid spacing, CoMA9_TBv1.2 science | ``moose:/devfc/u-dq613/field.pp/`` | ``YYYYMMDDT0000Z_umglaa_p*.pp`` |
+| Global 10km GAL9 control | Global coupled forecasts, 10km grid spacing, 6A convection scheme | suite ID to be added soon | |
 
 This page will soon be updated with details of how to access the 40-day DYAMOND-Summer and DYAMOND-Winter Unified Model experiments (via MASS). 
