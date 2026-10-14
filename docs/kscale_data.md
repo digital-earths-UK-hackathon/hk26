@@ -49,6 +49,6 @@ The native-grid ``pp`` output files from these simulations are stored on MASS an
 | --------------- | ----------- | ------------------------------ | ---------------------------- | ----------- |
 | Global 5km CoMA9_TBv1.2 | Global coupled forecasts, 5km grid spacing, CoMorph-A convection scheme with changes for running in the convective grey-zone | ``/gws/ssde/j25b/kscale/demonstrator_data/u-dp135/netcdf/`` | ``moose:/devfc/u-dp135/field.pp/`` | ``YYYYMMDDT0000Z_umglaa_p*.[pp,nc]`` |
 | Global 10km CoMA9_TBv1.2 | Global coupled forecasts, 10km grid spacing, CoMA9_TBv1.2 science | ``/gws/ssde/j25b/kscale/demonstrator_data/u-dq613/netcdf/`` | ``moose:/devfc/u-dq613/field.pp/`` | ``YYYYMMDDT0000Z_umglaa_p*.[pp,nc]`` |
-| Global 10km GAL9 control | Global coupled forecasts, 10km grid spacing, 6A convection scheme | ``/gws/ssde/j25b/kscale/demonstrator_data/u-dt600`` | ``moose:/devfc/u-dq613/field.pp/`` | ``YYYYMMDDT0000Z_umglaa_p*.[pp,nc]`` |
+| Global 10km GAL9 control | Global coupled forecasts, 10km grid spacing, 6A convection scheme | ``/gws/ssde/j25b/kscale/demonstrator_data/u-dt600`` | ``moose:/devfc/u-dt600/field.pp/`` | ``YYYYMMDDT0000Z_umglaa_p*.[pp,nc]`` |
 
 This page will soon be updated with details of how to access the 40-day DYAMOND-Summer and DYAMOND-Winter Unified Model experiments (via MASS). 
